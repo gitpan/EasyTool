@@ -5,8 +5,6 @@ version:      2006.06.13
 version_from: EasyTool.pm
 installdirs:  site
 requires: 
-	Test::Simple:                  0.4
-	Time::Local:                   1.04
 
 distribution_type: module
 generated_by: ExtUtils::MakeMaker version 6.17
