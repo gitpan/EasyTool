@@ -1,11 +1,6 @@
 OVERVIEW
 
-The EasyTool module aims to provide a easy to use function set
-
-you can copy and paste some function to embed into your code as easy as possiable
-youc can also make some modification on function
-
-this package inlcude the time operate related function part of EasyTool
+The EasyTool.pm module aims to provide a easy to use Perl Functions in Common Usage
 
 All of these feature is in a easy way.
 
@@ -19,7 +14,13 @@ directory:
    make test
    make install
 
-or simply copy EasyTool.pm and EasyTool dir to your lib path
+or simply copy EasyTool.pm to your lib path
+
+To uninstall this module type the following:
+
+rm -rdf `cat /usr/lib/perl5/site_perl/5.8.5/i386-linux-thread-multi/auto/EasyTool/.packlist` /usr/lib/perl5/site_perl/5.8.5/i386-linux-thread-multi/auto/EasyTool
+
 
 Author
-	QIAN YU/foolfish@cpan.org
+	QIAN YU / foolfish@cpan.org
+	Kylin Huang / huang.shuai@adways.net

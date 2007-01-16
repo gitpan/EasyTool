@@ -1,3 +1,5 @@
-#===TODO: time zone supports
-#===2006.06.13: change file structure to look better
-#===2006.06.12: first release
+#===1.0.4(2006-09-08): add function text_2_html
+#===1.0.3(2006-08-18): fix date bug
+#===1.0.2(2006-07-28): add function crc32
+#===1.0.1(2006-07-27): fix bugs, add functions, document format
+#===1.0.0(2006-06-12): first release

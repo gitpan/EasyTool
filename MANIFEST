@@ -1,10 +1,9 @@
-README
-LICENSE
-CHANGES                   History of significant changes to the EasyTool
+CHANGES
 EasyTool.pm
-EasyTool/TimeFunc.pm
-EasyTool/TimeFunc.pod
-t/TimeFunc.t
-META.yml                  Module meta-data in YAML
+INSTALL
+LICENSE
+Makefile.PL
 MANIFEST
-Makefile.PL               The Makefile generator
+README
+t/EasyTool.t
+META.yml                                 Module meta-data (added by MakeMaker)

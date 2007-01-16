@@ -1,10 +1,15 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         EasyTool
-version:      2006.06.13
+version:      1.0.4
 version_from: EasyTool.pm
 installdirs:  site
-requires: 
+requires:
+    Digest::MD5:                   0
+    FileHandle:                    0
+    MIME::Base64:                  0
+    MIME::QuotedPrint:             0
+    Time::Local:                   0
 
 distribution_type: module
 generated_by: ExtUtils::MakeMaker version 6.17
