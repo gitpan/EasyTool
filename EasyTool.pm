@@ -2,7 +2,7 @@ package EasyTool;
 use strict;
 use warnings(FATAL=>'all');
 
-our $VERSION = '1.0.4';
+our $VERSION = '1.0.7';
 
 #===================================
 #===Module  : 43f0273ba176b02f
@@ -30,6 +30,9 @@ our $VERSION = '1.0.4';
 #===MSN     : huang.shuai@adways.net ===
 #=======================================
 
+#===1.0.7(2007-06-11): fix CORE::die bug, add mkdirs function, modify ifnull function, modify write_file function
+#===1.0.6(2007-03-20): add lwp get web page function
+#===1.0.5(2007-02-09): fix bug in _time_func_is_int and is_int
 #===1.0.4(2006-09-08): add function text_2_html
 #===1.0.3(2006-08-18): fix date bug
 #===1.0.2(2006-07-28): add function crc32
@@ -126,7 +129,10 @@ sub is_int{
   if($param_count==1||$param_count==2||$param_count==3){
     eval{$num=int($str);};
     if($@){undef $@;return defined(&_name_false)?&_name_false:'';}
-    if($num ne $str){return defined(&_name_false)?&_name_false:'';}
+#==1.0.5==
+    if($str !~ /^-?\d+$/){return defined(&_name_false)?&_name_false:'';}
+#    if($num ne $str){return defined(&_name_false)?&_name_false:'';}
+#===end===
     if($param_count==1){
       $max=2147483648;$min=-2147483648;
     }elsif($param_count==2){
@@ -220,7 +226,7 @@ sub in {
   }
 }
 
-#===$flag=ifnull($scalar1,$scalar2)
+#===$value=ifnull($scalar1,$scalar2)
 #===If $scalar1 is not undef, return $scalar1, else return $scalar2
 sub ifnull{
   my $param_count=scalar(@_);
@@ -237,7 +243,7 @@ sub read_file{
   my $_max_file_len = 100000000;
   my $fh=FileHandle->new($file_path,'r');
   if(!defined($fh)){
-    CORE::die defined(&_name_pkg_name)?&_name_pkg_name.'::':''.'read_file: open file failed';#return undef
+    CORE::die((defined(&_name_pkg_name)?&_name_pkg_name.'::':'').'read_file: open file failed');#return undef
   }
   binmode($fh);
   my $bytes;
@@ -251,7 +257,12 @@ sub write_file{
   my ($file_path,$bytes)=@_;
   my $fh=FileHandle->new($file_path,'w');
   if(!defined($fh)){
-    CORE::die defined(&_name_pkg_name)?&_name_pkg_name.'::':''.'write_file: open file failed';#return undef
+  	if($file_path=~/^(.+)[\\\/][^\\\/]+$/){
+  		mkdirs($1);
+  		$fh=FileHandle->new($file_path,'w');
+  	}else{
+  		CORE::die ((defined(&_name_pkg_name)?&_name_pkg_name.'::':'').'write_file: open file failed');#return undef
+  	}
   }
   binmode($fh);
   my $byte_count=$fh->syswrite($bytes);
@@ -264,7 +275,7 @@ sub append_file{
   my ($file_path,$bytes)=@_;
   my $fh=FileHandle->new($file_path,'a');
   if(!defined($fh)){
-    CORE::die defined(&_name_pkg_name)?&_name_pkg_name.'::':''.'append_file: open file failed';#return undef
+    CORE::die((defined(&_name_pkg_name)?&_name_pkg_name.'::':'').'append_file: open file failed');#return undef
   }
   binmode($fh);
   my $byte_count=$fh->syswrite($bytes);
@@ -272,6 +283,23 @@ sub append_file{
   return $byte_count;
 }
 
+#===$flag=mkdirs($dir)
+#===make dir and its parent dir,return true,if fail will die
+sub mkdirs{
+	my ($dir)=@_;
+	my $r=mkdir($dir);
+	if(!$r){
+		if($dir=~/^(.+)[\\\/][^\\\/]+$/){
+			mkdirs($1);
+			return mkdir($dir);
+		}else{
+			#return false
+			CORE::die ((defined(&_name_pkg_name)?&_name_pkg_name.'::':'').'mkdirs: cannot make dir');
+		}
+	}else{
+		return $r;
+	}
+}
 #==1.0.1==
 #===$delete_num=delete_file($file_path)
 sub delete_file{
@@ -285,7 +313,7 @@ sub csv_2_array{
   my $file_path = shift;
   my $fh=FileHandle->new($file_path,'r');
   if(!defined($fh)){
-    CORE::die defined(&_name_pkg_name)?&_name_pkg_name.'::':''.'csv_2_array: open file failed';#return undef
+    CORE::die ((defined(&_name_pkg_name)?&_name_pkg_name.'::':'').'csv_2_array: open file failed');#return undef
   }
   
   my @res;
@@ -326,7 +354,7 @@ sub array_2_csv{
   return unless(defined($ra_array));
   my $fh=FileHandle->new($file_path,'w');
   if(!defined($fh)){
-    CORE::die defined(&_name_pkg_name)?&_name_pkg_name.'::':''.'array_2_csv: open file failed';#return undef
+    CORE::die ((defined(&_name_pkg_name)?&_name_pkg_name.'::':'').'array_2_csv: open file failed');#return undef
   }
   my $file = '';
   foreach my $ra_line (@$ra_array){
@@ -467,6 +495,29 @@ sub qquote_bin{
   s/([\x00-\xff])/'\\x'.sprintf('%02X',ord($1))/eg;
   s/([^\x00-\x7f])/sprintf("\\x{%04X}",ord($1))/eg if utf8::is_utf8($_);
   return qq("$_");
+}
+
+sub lwp_get {
+    my $url = shift;
+    require LWP::UserAgent;
+    my $ua = new LWP::UserAgent;
+    my $request = new HTTP::Request('GET', $url);
+    my $content = $ua->request($request);
+    return $content->{_content};
+}
+
+sub lwp_post {
+    my ($url, $rh_data) = @_;
+    my $ra_data = [];
+    foreach (keys %$rh_data) {
+        push (@$ra_data, $_);
+        push (@$ra_data, $rh_data->{$_});
+    }
+    require LWP::UserAgent;
+    my $ua = new LWP::UserAgent;
+    my $request = new HTTP::Request('POST', $url, $ra_data);
+    my $content = $ua->request($request);
+    return $content;
 }
 
 sub dump{
@@ -633,7 +684,10 @@ sub _time_func_is_int{
   if($param_count==1||$param_count==2||$param_count==3){
     eval{$num=int($str);};
     if($@){undef $@;return defined(&_name_false)?&_name_false:'';}
-    if($num ne $str){return defined(&_name_false)?&_name_false:'';}
+#==1.0.5==
+    if($str !~ /^-?\d+$/){return defined(&_name_false)?&_name_false:'';}
+#    if($num ne $str){return defined(&_name_false)?&_name_false:'';}
+#===end===
     if($param_count==1){
       $max=2147483648;$min=-2147483648;
     }elsif($param_count==2){
